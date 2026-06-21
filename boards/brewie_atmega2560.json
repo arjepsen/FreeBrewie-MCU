@@ -1,0 +1,18 @@
+{
+  "build": {
+    "core": "atmelavr",
+    "f_cpu": "16000000L",
+    "mcu": "atmega2560",
+    "extra_flags": ""
+  },
+  "frameworks": [],
+  "name": "Brewie ATmega2560 (bare)",
+  "platform": "atmelavr",
+  "upload": {
+    "maximum_ram_size": 8192,
+    "maximum_size": 253952,
+    "protocol": "usbasp"
+  },
+  "url": "",
+  "vendor": "Brewie"
+}
