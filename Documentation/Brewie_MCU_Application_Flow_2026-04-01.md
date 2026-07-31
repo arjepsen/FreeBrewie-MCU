@@ -4,7 +4,7 @@
 This document defines the overall MCU program flow and top-level state model.
 
 It is meant to work together with:
-- **`Brewie_SOM_MCU_Protocol_2026-04-01.md`** = communication and control model
+- **`Brewie_SOM_MCU_Protocol_2026-07-31.md`** = communication and control model
 - **`Brewie_MCU_Runtime_Services_2026-04-01.md`** = outer-loop responsibilities
 - **`Brewie_MCU_Structure_Notes_Updated_2026-04-01.md`** = naming, ownership, and architecture truth
 - **`Brewie_MCU_Roadmap_Updated_2026-04-01.md`** = progress and next steps

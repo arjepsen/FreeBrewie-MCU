@@ -1,4 +1,5 @@
 # Brewie SOM-MCU Protocol
+_Updated: 2026-07-31_
 
 ## Purpose
 This document defines the communication model between the Brewie SOM and the ATmega2560 MCU.
@@ -329,8 +330,23 @@ All other bits are currently invalid and should cause `NACK` with `bad payload`.
 
 The 11 valve command bytes correspond to valve IDs 1 through 11 in order.
 
-Each value must map to a known MCU valve position value. Unknown valve position values
-should cause `NACK` with `bad payload`.
+These are protocol wire command values, not the raw MCU `valve_position_t` enum values:
+
+```text
+0   no requested valve target
+1   open
+2   close
+3   close hard
+4   sparge open
+5   sparge close
+```
+
+Unknown valve command values should cause `NACK` with `bad payload`.
+
+Important distinction:
+- `CONTROL_SNAPSHOT.valve_command[]` uses the protocol wire values above.
+- `STATUS_REPORT.valve_state[]` reports the MCU's current remembered valve-position enum
+  values.
 
 ### `HEARTBEAT` payload
 
@@ -381,6 +397,16 @@ Use `FAULT_REPORT` for the fuller fault picture, including latched flags and pri
 #### `valve_state`
 
 The 11 valve state bytes correspond to valve IDs 1 through 11 in order.
+
+These values report the MCU's remembered `valve_position_t` state:
+
+```text
+0   open
+1   close
+2   close hard
+3   sparge open
+4   sparge close
+```
 
 ### `FAULT_REPORT` payload
 
