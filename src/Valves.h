@@ -75,6 +75,7 @@ typedef struct
 // ======================================================================================
 
 void valves_init();
+void valves_update();
 
 bool valves_is_installed(valve_id_t valve_id);
 bool valves_is_busy();

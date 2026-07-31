@@ -2,6 +2,7 @@
 #define SUPERVISOR_H
 
 #include "Faults.h"
+#include "Valves.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -78,7 +79,8 @@ typedef struct
     uint8_t mash_pump_setpoint;
     uint8_t boil_pump_setpoint;
     uint8_t solenoid_state_bits;
-    uint8_t valve_command[11];
+    uint16_t valve_move_mask;
+    valve_position_t valve_position[11];
 } supervisor_control_snapshot_t;
 
 typedef struct

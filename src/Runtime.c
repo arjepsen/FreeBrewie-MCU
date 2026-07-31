@@ -9,6 +9,7 @@
 #include "Temperature.h"
 #include "TWI.h"
 #include "UART.h"
+#include "Valves.h"
 
 #include <util/delay.h>
 
@@ -69,4 +70,5 @@ void service_timed_tasks()
     heaters_update();
     pumps_update();
     fans_update();
+    valves_update();
 }

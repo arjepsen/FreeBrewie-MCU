@@ -1342,3 +1342,13 @@ ISR(TIMER4_COMPB_vect)
         valves_active_move.sample_pending = 0U;
     }
 }
+
+
+void valves_update()
+{
+    valve_move_result_t result;
+
+    while (valves_get_completed_move(&result))
+    {
+    }
+}

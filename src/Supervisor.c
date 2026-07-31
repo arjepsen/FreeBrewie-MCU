@@ -1,6 +1,7 @@
 #include "Supervisor.h"
 #include "Buttons.h"
 #include "Comms.h"
+#include "Valves.h"
 
 #include <stdint.h>
 
@@ -77,7 +78,16 @@ supervisor_runtime_t supervisor_runtime =
     .primary_fault_code = FAULT_REASON_NONE,
     .boot_phase = SUPERVISOR_BOOT_PHASE_PRECHARGE,
     .shutdown_phase = SUPERVISOR_SHUTDOWN_PHASE_START,
-    .accepted_snapshot = { 0U, 0U, 0U, 0U, 0U, { 0U } },
+    .accepted_snapshot =
+    {
+        .mash_target_c = 0U,
+        .boil_target_c = 0U,
+        .mash_pump_setpoint = 0U,
+        .boil_pump_setpoint = 0U,
+        .solenoid_state_bits = 0U,
+        .valve_move_mask = 0U,
+        .valve_position = { VALVE_POSITION_CLOSE }
+    },
     .requested_outputs = { SUPERVISOR_OUTPUT_FLAG_NONE, SUPERVISOR_OUTPUT_MODE_NONE, 0U, 0U, 0U, 0U, SUPERVISOR_HEATER_REQUEST_NONE }
 };
 
@@ -106,7 +116,17 @@ void supervisor_init()
     supervisor_runtime.primary_fault_code = FAULT_REASON_NONE;
     supervisor_runtime.boot_phase = SUPERVISOR_BOOT_PHASE_PRECHARGE;
     supervisor_runtime.shutdown_phase = SUPERVISOR_SHUTDOWN_PHASE_START;
-    supervisor_runtime.accepted_snapshot = (supervisor_control_snapshot_t){ 0U, 0U, 0U, 0U, 0U, { 0U } };
+    supervisor_runtime.accepted_snapshot = (supervisor_control_snapshot_t)
+    {
+        .mash_target_c = 0U,
+        .boil_target_c = 0U,
+        .mash_pump_setpoint = 0U,
+        .boil_pump_setpoint = 0U,
+        .solenoid_state_bits = 0U,
+        .valve_move_mask = 0U,
+        .valve_position = { VALVE_POSITION_CLOSE }
+    };
+
     SUPERVISOR_REQUEST_CLEAR(&supervisor_runtime.requested_outputs);
 }
 
@@ -439,13 +459,19 @@ static void supervisor_apply_snapshot_to_request(supervisor_output_request_t *re
      * Only publish one valve move request at a time because the existing
      * valve path is modeled around a single active move command.
      */
-    for (valve_index = 0U; valve_index < (uint8_t)(sizeof(snapshot->valve_command) / sizeof(snapshot->valve_command[0])); valve_index++)
+    for (valve_index = 0U; valve_index < 11U; valve_index++)
     {
-        if (snapshot->valve_command[valve_index] != 0U)
+        if ((snapshot->valve_move_mask & (uint16_t)(1U << valve_index)) != 0U)
         {
-            request->valve_id = (uint8_t)(valve_index + 1U);
-            request->valve_position = snapshot->valve_command[valve_index];
-            break;
+            valve_id_t valve_id = (valve_id_t)(valve_index + 1U);
+            valve_position_t target_position = snapshot->valve_position[valve_index];
+
+            if (valves_get_last_position(valve_id) != target_position)
+            {
+                request->valve_id = (uint8_t)valve_id;
+                request->valve_position = (uint8_t)target_position;
+                break;
+            }
         }
     }
 }

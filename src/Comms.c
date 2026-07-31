@@ -30,6 +30,12 @@
 #define COMMS_STATUS_BIT_PRESSURE_VALID            (1U << 2)
 #define COMMS_STATUS_BIT_HEARTBEAT_ALIVE           (1U << 3)
 
+#define COMMS_VALVE_COMMAND_NONE                    0U
+#define COMMS_VALVE_COMMAND_OPEN                    1U
+#define COMMS_VALVE_COMMAND_CLOSE                   2U
+#define COMMS_VALVE_COMMAND_CLOSE_HARD              3U
+#define COMMS_VALVE_COMMAND_SPARGE_OPEN             4U
+#define COMMS_VALVE_COMMAND_SPARGE_CLOSE            5U
 
 typedef enum
 {
@@ -104,6 +110,7 @@ static void comms_build_fault_report_payload(comms_fault_report_payload_t *paylo
 static uint16_t comms_encode_u16(uint8_t *buffer, uint16_t value);
 static uint16_t comms_encode_i16(uint8_t *buffer, int16_t value);
 
+static bool comms_decode_valve_command(uint8_t wire_value, bool *requested, valve_position_t *position);
 
 // ======================================================================================
 //  GLOBALS
@@ -120,7 +127,16 @@ comms_runtime_t comms_runtime =
     .next_tx_seq = 1U,
     .last_heartbeat_time_ms = 0UL,
     .next_status_report_time_ms = COMMS_STATUS_REPORT_PERIOD_MS,
-    .pending_control_snapshot = { 0U, 0U, 0U, 0U, 0U, { 0U } }
+    .pending_control_snapshot =
+    {
+        .mash_target_c = 0U,
+        .boil_target_c = 0U,
+        .mash_pump_setpoint = 0U,
+        .boil_pump_setpoint = 0U,
+        .solenoid_state_bits = 0U,
+        .valve_move_mask = 0U,
+        .valve_position = { VALVE_POSITION_CLOSE }
+    }
 };
 
 static comms_rx_runtime_t comms_rx_runtime =
@@ -155,7 +171,16 @@ void comms_init()
     comms_runtime.next_tx_seq = 1U;
     comms_runtime.last_heartbeat_time_ms = 0UL;
     comms_runtime.next_status_report_time_ms = COMMS_STATUS_REPORT_PERIOD_MS;
-    comms_runtime.pending_control_snapshot = (supervisor_control_snapshot_t){ 0U, 0U, 0U, 0U, 0U, { 0U } };
+    comms_runtime.pending_control_snapshot = (supervisor_control_snapshot_t)
+    {
+        .mash_target_c = 0U,
+        .boil_target_c = 0U,
+        .mash_pump_setpoint = 0U,
+        .boil_pump_setpoint = 0U,
+        .solenoid_state_bits = 0U,
+        .valve_move_mask = 0U,
+        .valve_position = { VALVE_POSITION_CLOSE }
+    };
 
     comms_rx_reset();
 }
@@ -458,9 +483,24 @@ static void comms_handle_control_snapshot(uint8_t seq, const uint8_t *data, uint
     snapshot.boil_pump_setpoint = data[3];
     snapshot.solenoid_state_bits = data[4];
 
+    snapshot.valve_move_mask = 0U;
+
     for (valve_index = 0U; valve_index < 11U; valve_index++)
     {
-        snapshot.valve_command[valve_index] = data[5U + valve_index];
+        bool requested = false;
+        valve_position_t position = VALVE_POSITION_CLOSE;
+
+        if (!comms_decode_valve_command(data[5U + valve_index], &requested, &position))
+        {
+            (void)comms_send_nack(COMMS_TYPE_CONTROL_SNAPSHOT, seq, COMMS_NACK_REASON_BAD_PAYLOAD);
+            return;
+        }
+
+        if (requested)
+        {
+            snapshot.valve_move_mask |= (uint16_t)(1U << valve_index);
+            snapshot.valve_position[valve_index] = position;
+        }
     }
 
     if (!comms_control_snapshot_is_valid(&snapshot))
@@ -526,8 +566,6 @@ static void comms_handle_fault_clear_request(uint8_t seq, const uint8_t *data, u
  ****************************************************************************************/
 static bool comms_control_snapshot_is_valid(const supervisor_control_snapshot_t *snapshot)
 {
-    uint8_t valve_index;
-
     if (snapshot == NULL)
     {
         return false;
@@ -536,14 +574,6 @@ static bool comms_control_snapshot_is_valid(const supervisor_control_snapshot_t 
     if ((snapshot->solenoid_state_bits & (uint8_t)~(COMMS_SOLENOID_BIT_BREW_INLET | COMMS_SOLENOID_BIT_COOLING_INLET)) != 0U)
     {
         return false;
-    }
-
-    for (valve_index = 0U; valve_index < 11U; valve_index++)
-    {
-        if (snapshot->valve_command[valve_index] >= (uint8_t)VALVE_POSITION_COUNT)
-        {
-            return false;
-        }
     }
 
     return true;
@@ -818,4 +848,48 @@ static uint16_t comms_encode_u16(uint8_t *buffer, uint16_t value)
 static uint16_t comms_encode_i16(uint8_t *buffer, int16_t value)
 {
     return comms_encode_u16(buffer, (uint16_t)value);
+}
+
+
+static bool comms_decode_valve_command(uint8_t wire_value,
+                                       bool *requested,
+                                       valve_position_t *position)
+{
+    if ((requested == NULL) || (position == NULL))
+    {
+        return false;
+    }
+
+    *requested = true;
+
+    switch (wire_value)
+    {
+        case COMMS_VALVE_COMMAND_NONE:
+            *requested = false;
+            *position = VALVE_POSITION_CLOSE;
+            return true;
+
+        case COMMS_VALVE_COMMAND_OPEN:
+            *position = VALVE_POSITION_OPEN;
+            return true;
+
+        case COMMS_VALVE_COMMAND_CLOSE:
+            *position = VALVE_POSITION_CLOSE;
+            return true;
+
+        case COMMS_VALVE_COMMAND_CLOSE_HARD:
+            *position = VALVE_POSITION_CLOSE_HARD;
+            return true;
+
+        case COMMS_VALVE_COMMAND_SPARGE_OPEN:
+            *position = VALVE_POSITION_SPARGE_OPEN;
+            return true;
+
+        case COMMS_VALVE_COMMAND_SPARGE_CLOSE:
+            *position = VALVE_POSITION_SPARGE_CLOSE;
+            return true;
+
+        default:
+            return false;
+    }
 }

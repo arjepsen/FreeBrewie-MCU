@@ -36,8 +36,7 @@
 #define FAULTS_REQUEST_HAS_ANY_SPEED(request_ptr)    (((request_ptr)->mash_pump_speed != 0U) || \
                                                       ((request_ptr)->boil_pump_speed != 0U))
 
-#define FAULTS_REQUEST_HAS_ANY_VALVE(request_ptr)    (((request_ptr)->valve_id != 0U) || \
-                                                      ((request_ptr)->valve_position != 0U))
+#define FAULTS_REQUEST_HAS_ANY_VALVE(request_ptr)    ((request_ptr)->valve_id != 0U)
 
 #define FAULTS_REQUEST_HAS_HEATER(request_ptr)       ((request_ptr)->heater_request != SUPERVISOR_HEATER_REQUEST_NONE)
 
@@ -107,7 +106,9 @@ void faults_update()
         problem_flags |= FAULT_FLAG_INVALID_BOIL_PUMP_REQUEST;
     }
 
-    if ((request->valve_id == 0U) && (request->valve_position != 0U))
+    if ((request->valve_id != 0U) &&
+        ((request->valve_id >= (uint8_t)VALVE_ID_COUNT) ||
+        (request->valve_position >= (uint8_t)VALVE_POSITION_COUNT)))
     {
         problem_flags |= FAULT_FLAG_INVALID_VALVE_REQUEST;
     }
