@@ -9,11 +9,11 @@ It now reflects:
 - a clearer split between SOM-owned logic and MCU-owned execution/safety
 
 ## Companion documents
-- **`Brewie_MCU_Pin_Map_Updated_2026-04-01.md`** = hardware truth
-- **`Brewie_SOM_MCU_Protocol_2026-07-31.md`** = protocol and control model
-- **`Brewie_MCU_Structure_Notes_Updated_2026-04-01.md`** = naming, ownership, and architecture truth
-- **`Brewie_MCU_Runtime_Services_2026-04-01.md`** = outer-loop service ownership
-- **`Brewie_MCU_Application_Flow_2026-04-01.md`** = top-level state model
+- **`Brewie_MCU_Pin_Map_Updated_2026-08-01.md`** = hardware truth
+- **`Brewie_SOM_MCU_Protocol_2026-08-01.md`** = protocol and control model
+- **`Brewie_MCU_Structure_Notes_Updated_2026-08-01.md`** = naming, ownership, and architecture truth
+- **`Brewie_MCU_Runtime_Services_2026-08-01.md`** = outer-loop service ownership
+- **`Brewie_MCU_Application_Flow_2026-08-01.md`** = top-level state model
 
 ---
 

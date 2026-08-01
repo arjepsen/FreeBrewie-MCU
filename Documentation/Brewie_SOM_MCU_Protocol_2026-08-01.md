@@ -1,5 +1,5 @@
 # Brewie SOM-MCU Protocol
-_Updated: 2026-07-31_
+_Updated: 2026-08-01_
 
 ## Purpose
 This document defines the communication model between the Brewie SOM and the ATmega2560 MCU.
@@ -15,11 +15,11 @@ So the MCU does **not** know what a recipe is.
 It receives target-state snapshots, executes them if safe, and continuously reports back what the machine is actually doing.
 
 ## Companion documents
-- **`Brewie_MCU_Pin_Map_Updated_2026-04-01.md`** = hardware truth
-- **`Brewie_MCU_Structure_Notes_Updated_2026-04-01.md`** = naming, ownership, and architecture truth
-- **`Brewie_MCU_Runtime_Services_2026-04-01.md`** = outer-loop responsibilities
-- **`Brewie_MCU_Application_Flow_2026-04-01.md`** = state model and top-level behavior
-- **`Brewie_MCU_Roadmap_Updated_2026-04-01.md`** = progress and next steps
+- **`Brewie_MCU_Pin_Map_Updated_2026-08-01.md`** = hardware truth
+- **`Brewie_MCU_Structure_Notes_Updated_2026-08-01.md`** = naming, ownership, and architecture truth
+- **`Brewie_MCU_Runtime_Services_2026-08-01.md`** = outer-loop responsibilities
+- **`Brewie_MCU_Application_Flow_2026-08-01.md`** = state model and top-level behavior
+- **`Brewie_MCU_Roadmap_Updated_2026-08-01.md`** = progress and next steps
 
 ---
 

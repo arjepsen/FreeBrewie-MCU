@@ -6,11 +6,11 @@ This document captures the code structure, naming rules, module ownership, and t
 It now reflects the current MCU-side standby/startup behavior and the clearer SOM-MCU control split.
 
 ## Companion documents
-- **`Brewie_MCU_Pin_Map_Updated_2026-04-01.md`** = hardware truth
-- **`Brewie_SOM_MCU_Protocol_2026-07-31.md`** = protocol and control model
-- **`Brewie_MCU_Runtime_Services_2026-04-01.md`** = outer-loop service ownership
-- **`Brewie_MCU_Application_Flow_2026-04-01.md`** = top-level state model
-- **`Brewie_MCU_Roadmap_Updated_2026-04-01.md`** = progress and next steps
+- **`Brewie_MCU_Pin_Map_Updated_2026-08-01.md`** = hardware truth
+- **`Brewie_SOM_MCU_Protocol_2026-08-01.md`** = protocol and control model
+- **`Brewie_MCU_Runtime_Services_2026-08-01.md`** = outer-loop service ownership
+- **`Brewie_MCU_Application_Flow_2026-08-01.md`** = top-level state model
+- **`Brewie_MCU_Roadmap_Updated_2026-08-01.md`** = progress and next steps
 
 ---
 

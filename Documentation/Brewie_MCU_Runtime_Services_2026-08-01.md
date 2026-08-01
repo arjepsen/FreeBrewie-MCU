@@ -4,10 +4,10 @@
 This document defines the ownership and boundaries of the main runtime calls in the MCU firmware.
 
 It works together with:
-- **`Brewie_SOM_MCU_Protocol_2026-07-31.md`** = communication and control model
-- **`Brewie_MCU_Application_Flow_2026-04-01.md`** = top-level state model
-- **`Brewie_MCU_Structure_Notes_Updated_2026-04-01.md`** = naming and ownership truth
-- **`Brewie_MCU_Roadmap_Updated_2026-04-01.md`** = progress and next steps
+- **`Brewie_SOM_MCU_Protocol_2026-08-01.md`** = communication and control model
+- **`Brewie_MCU_Application_Flow_2026-08-01.md`** = top-level state model
+- **`Brewie_MCU_Structure_Notes_Updated_2026-08-01.md`** = naming and ownership truth
+- **`Brewie_MCU_Roadmap_Updated_2026-08-01.md`** = progress and next steps
 
 ---
 
