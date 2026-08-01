@@ -16,7 +16,13 @@
                                                   SUPERVISOR_OUTPUT_FLAG_PRECHARGE_5V | \
                                                   SUPERVISOR_OUTPUT_FLAG_PWR_5V | \
                                                   SUPERVISOR_OUTPUT_FLAG_PWR_12V | \
-                                                  SUPERVISOR_OUTPUT_FLAG_POWER_LED)
+                                                  SUPERVISOR_OUTPUT_FLAG_POWER_LED | \
+                                                  SUPERVISOR_OUTPUT_FLAG_BREW_INLET | \
+                                                  SUPERVISOR_OUTPUT_FLAG_COOLING_INLET | \
+                                                  SUPERVISOR_OUTPUT_FLAG_MASH_PUMP_ENABLE | \
+                                                  SUPERVISOR_OUTPUT_FLAG_BOIL_PUMP_ENABLE | \
+                                                  SUPERVISOR_OUTPUT_FLAG_FAN_ENABLE | \
+                                                  SUPERVISOR_OUTPUT_FLAG_HEATER_ENABLE)
 
 #define FAULTS_ALLOWED_FAULT_FLAGS               (SUPERVISOR_OUTPUT_FLAG_PRECHARGE_5V | \
                                                   SUPERVISOR_OUTPUT_FLAG_PWR_5V | \
@@ -108,7 +114,7 @@ void faults_update()
 
     if ((request->valve_id != 0U) &&
         ((request->valve_id >= (uint8_t)VALVE_ID_COUNT) ||
-        (request->valve_position >= (uint8_t)VALVE_POSITION_COUNT)))
+         (request->valve_position >= (uint8_t)VALVE_POSITION_COUNT)))
     {
         problem_flags |= FAULT_FLAG_INVALID_VALVE_REQUEST;
     }
@@ -139,9 +145,13 @@ void faults_update()
             break;
 
         case SUPERVISOR_STATE_ACTIVE:
+            /*
+             * ACTIVE is the one normal operating state where valid actuator work is allowed.
+             * Structural request checks above still catch invalid pump/heater/valve pictures,
+             * and fault/safe-output gating remains the final authority before hardware commit.
+             */
             if (((request->binary_flags & (uint16_t)(~FAULTS_ALLOWED_ACTIVE_FLAGS)) != 0U) ||
-                (request->mode_flags != SUPERVISOR_OUTPUT_MODE_ACTIVE) ||
-                has_any_work)
+                (request->mode_flags != SUPERVISOR_OUTPUT_MODE_ACTIVE))
             {
                 problem_flags |= FAULT_FLAG_UNSAFE_ACTIVE_REQUEST;
             }
