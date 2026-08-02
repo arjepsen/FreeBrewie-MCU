@@ -29,7 +29,7 @@ do not use PlatformIO's built-in `Burn Bootloader` target for this board.
 Hardware testing on 2026-08-02 showed the working recovery state is:
 - old Brewie-carried STK500v2 bootloader image in flash
 - `lfuse=0xFF`
-- `hfuse=0xD9`
+- `hfuse=0xD8`
 - `efuse=0xFD`
 - `lock=0x3F`
 

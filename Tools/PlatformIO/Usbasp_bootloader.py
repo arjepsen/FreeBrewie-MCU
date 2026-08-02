@@ -12,9 +12,9 @@ Why this exists:
     - final lock byte 0x0F prevents the FreeBrewie app from starting here.
 
     This target installs the old Brewie-carried STK500v2 bootloader image,
-    leaves lock bits open, and keeps reset directed to the app. The bootloader
-    remains in flash for SOM-side UART updates, but normal power-up starts the
-    FreeBrewie firmware directly.
+    leaves lock bits open, and keeps reset directed to the bootloader. Hardware
+    testing showed that this still starts the FreeBrewie app after the bootloader
+    timeout, while also allowing SOM-side UART updates.
 """
 
 from os.path import abspath, join
@@ -46,7 +46,7 @@ restore_bootloader_command = [
     "100",
     "-e",
     "-Ulock:w:0x3F:m",
-    "-Uhfuse:w:0xD9:m",
+    "-Uhfuse:w:0xD8:m",
     "-Ulfuse:w:0xFF:m",
     "-Uefuse:w:0xFD:m",
     "-Uflash:w:%s:i" % bootloader_path,
@@ -60,7 +60,7 @@ restore_bootloader_target = env.AddCustomTarget(
         "Installing Brewie ATmega2560 bootloader with USBasp",
     ),
     title="Restore Bootloader USBasp",
-    description="Install the Brewie STK500v2 bootloader with USBasp, leaving app startup enabled.",
+    description="Install the Brewie STK500v2 bootloader with USBasp, leaving SOM flashing enabled.",
 )
 
 AlwaysBuild(restore_bootloader_target)

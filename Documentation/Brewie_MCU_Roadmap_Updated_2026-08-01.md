@@ -49,7 +49,7 @@ from
 | Shared infrastructure | Make ADC/timers/SPI/UART coexist cleanly | 🟡 | Still important for integration |
 | Protocol/control model | Define SOM↔MCU message model clearly | 🟡 | Now substantially clearer |
 | Supervisor structure | Keep MCU top level compact and truthful | 🟡 | Standby-aware state model now adopted |
-| Update workflow | Make normal MCU updates run through the SOM | 🟡 | Requires standard ATmega2560 bootloader |
+| Update workflow | Make normal MCU updates run through the SOM | 🟢 | Requires Brewie-compatible ATmega2560 bootloader |
 | Safety and fault handling | Force safe behavior when needed | 🟡 | Still active work |
 | Production runtime loop | Assemble the full runtime-loop shape | 🟡 | Direction clear, implementation still maturing |
 | Final validation and cleanup | Freeze behavior and docs | ⬜ | Later stage |
@@ -142,7 +142,7 @@ Important rule:
 - USBasp/ISP is recovery/bootstrap only
 - use the project `mega2560_recovery_usbasp` custom target `Restore Bootloader USBasp`
 - do not use PlatformIO's built-in `Burn Bootloader` target for this board
-- tested recovery state is `lfuse=0xFF`, `hfuse=0xD9`, `efuse=0xFD`, `lock=0x3F`
+- tested SOM-flash recovery state is `lfuse=0xFF`, `hfuse=0xD8`, `efuse=0xFD`, `lock=0x3F`
 - final lock byte `0x0F` was tested and made the FreeBrewie app fail to start
 - if USBasp/ISP erased or bypassed the bootloader, SOM flashing will fail with
   `stk500v2_getsync(): timeout communicating with programmer`
@@ -208,7 +208,7 @@ Includes:
 
 ### Still to complete before MCU firmware is finished
 - [ ] protocol details frozen enough for code implementation
-- [ ] standard ATmega2560 bootloader restored/verified for SOM-side flashing
+- [x] Brewie-compatible ATmega2560 bootloader restored/verified for SOM-side flashing
 - [ ] standby-aware state model reflected fully and coherently in code
 - [ ] first real framed protocol path implemented and tested
 - [ ] first real safety/fault framework implemented
@@ -221,7 +221,7 @@ Includes:
 ## Current recommended next focus
 At the current stage, the most sensible next focus is:
 1. keep docs and code aligned with the new `STANDBY` startup model
-2. restore/verify the standard ATmega2560 bootloader so SOM-side MCU flashing works
+2. keep the Brewie-compatible bootloader/SOM flash path documented and repeatable
 3. verify the first real SOM↔MCU protocol path against that startup model
 4. build the first real safety/fault path
 5. keep `Main.c` thin while the runtime loop is assembled
