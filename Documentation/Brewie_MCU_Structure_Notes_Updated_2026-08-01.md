@@ -14,6 +14,32 @@ It now reflects the current MCU-side standby/startup behavior and the clearer SO
 
 ---
 
+## Firmware update workflow
+Normal MCU firmware updates should be treated as appliance updates:
+
+1. build `firmware.hex` with PlatformIO
+2. copy the hex to the SOM
+3. flash from the SOM over `/dev/ttyS1`
+
+This requires a Brewie-compatible ATmega2560/STK500v2 bootloader to be installed.
+USBasp/ISP is a recovery/bootstrap tool, not the preferred normal update path.
+Use the `mega2560_recovery_usbasp` custom target `Restore Bootloader USBasp`;
+do not use PlatformIO's built-in `Burn Bootloader` target for this board.
+
+Hardware testing on 2026-08-02 showed the working recovery state is:
+- old Brewie-carried STK500v2 bootloader image in flash
+- `lfuse=0xFF`
+- `hfuse=0xD9`
+- `efuse=0xFD`
+- `lock=0x3F`
+
+The stock final bootloader lock byte `0x0F` was tested and made the FreeBrewie app
+fail to start. If the MCU was last flashed through USBasp/ISP and the bootloader
+was erased or bypassed, SOM flashing will fail because there is no bootloader
+listening on UART after reset.
+
+---
+
 ## Core principle
 The MCU is not the recipe brain.
 

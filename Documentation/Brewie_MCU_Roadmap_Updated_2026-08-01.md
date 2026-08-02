@@ -49,6 +49,7 @@ from
 | Shared infrastructure | Make ADC/timers/SPI/UART coexist cleanly | 🟡 | Still important for integration |
 | Protocol/control model | Define SOM↔MCU message model clearly | 🟡 | Now substantially clearer |
 | Supervisor structure | Keep MCU top level compact and truthful | 🟡 | Standby-aware state model now adopted |
+| Update workflow | Make normal MCU updates run through the SOM | 🟡 | Requires standard ATmega2560 bootloader |
 | Safety and fault handling | Force safe behavior when needed | 🟡 | Still active work |
 | Production runtime loop | Assemble the full runtime-loop shape | 🟡 | Direction clear, implementation still maturing |
 | Final validation and cleanup | Freeze behavior and docs | ⬜ | Later stage |
@@ -128,7 +129,29 @@ High-level scope:
 
 ---
 
-### 5. Build the first real safety/fault path in code
+### 5. Establish the normal MCU update path through the SOM
+**Goal:** make future MCU updates use the same path the appliance will use in normal operation.
+
+Normal workflow:
+- build `firmware.hex` with PlatformIO
+- copy the hex to the SOM
+- flash from the SOM over `/dev/ttyS1`
+
+Important rule:
+- SOM flashing requires a Brewie-compatible ATmega2560/STK500v2 bootloader
+- USBasp/ISP is recovery/bootstrap only
+- use the project `mega2560_recovery_usbasp` custom target `Restore Bootloader USBasp`
+- do not use PlatformIO's built-in `Burn Bootloader` target for this board
+- tested recovery state is `lfuse=0xFF`, `hfuse=0xD9`, `efuse=0xFD`, `lock=0x3F`
+- final lock byte `0x0F` was tested and made the FreeBrewie app fail to start
+- if USBasp/ISP erased or bypassed the bootloader, SOM flashing will fail with
+  `stk500v2_getsync(): timeout communicating with programmer`
+
+**Status:** 🟡
+
+---
+
+### 6. Build the first real safety/fault path in code
 **Goal:** make the machine safe before higher-level behavior grows much further.
 
 Likely first areas:
@@ -142,7 +165,7 @@ Likely first areas:
 
 ---
 
-### 6. Flesh out the production runtime structure
+### 7. Flesh out the production runtime structure
 **Goal:** keep the intended runtime structure but replace the remaining temporary scaffolding.
 
 This now means:
@@ -181,9 +204,11 @@ Includes:
 - [x] `Runtime.h/.c` now owns the service helpers that should not live in `Main.c`
 - [x] the first protocol direction is now clear enough to document
 - [x] the startup model is now explicitly user-gated through `STANDBY` and `POWER_BUTTON`
+- [x] the SOM reset GPIO for MCU flashing has been identified and documented
 
 ### Still to complete before MCU firmware is finished
 - [ ] protocol details frozen enough for code implementation
+- [ ] standard ATmega2560 bootloader restored/verified for SOM-side flashing
 - [ ] standby-aware state model reflected fully and coherently in code
 - [ ] first real framed protocol path implemented and tested
 - [ ] first real safety/fault framework implemented
@@ -196,6 +221,7 @@ Includes:
 ## Current recommended next focus
 At the current stage, the most sensible next focus is:
 1. keep docs and code aligned with the new `STANDBY` startup model
-2. verify the first real SOM↔MCU protocol path against that startup model
-3. build the first real safety/fault path
-4. keep `Main.c` thin while the runtime loop is assembled
+2. restore/verify the standard ATmega2560 bootloader so SOM-side MCU flashing works
+3. verify the first real SOM↔MCU protocol path against that startup model
+4. build the first real safety/fault path
+5. keep `Main.c` thin while the runtime loop is assembled

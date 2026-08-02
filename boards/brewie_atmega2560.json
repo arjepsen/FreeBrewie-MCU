@@ -5,13 +5,24 @@
     "mcu": "atmega2560",
     "extra_flags": ""
   },
-  "frameworks": [],
+  "bootloader": {
+    "efuse": "0xFD",
+    "file": "stk500v2/stk500boot_v2_mega2560_brewie.hex",
+    "hfuse": "0xD9",
+    "lock_bits": "0x3F",
+    "lfuse": "0xFF",
+    "unlock_bits": "0x3F"
+  },
+  "frameworks": [
+    "arduino"
+  ],
   "name": "Brewie ATmega2560 (bare)",
   "platform": "atmelavr",
   "upload": {
     "maximum_ram_size": 8192,
     "maximum_size": 253952,
-    "protocol": "usbasp"
+    "protocol": "wiring",
+    "speed": 115200
   },
   "url": "",
   "vendor": "Brewie"
